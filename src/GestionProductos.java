@@ -15,61 +15,49 @@ import java.awt.event.ActionListener;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.*;
 import java.sql.*;
 import java.util.Random;
- 
 
 public class GestionProductos {
 
-    // URL de conexión a Clever Cloud (brayan)
-   // private static final String URL = "jdbc:mysql://biqivxhkta76airtzqfb-mysql.services.clever-cloud.com:3306/biqivxhkta76airtzqfb?useSSL=false";
-    //private static final String USER = "u3c1pw84rqzgvrhu";
-    //private static final String PASSWORD = "3BzUet9fLujycjKuy1k8";
-    
-    //jorge
-    private static final String URL = "jdbc:mysql://belbr9kwb1stmqbvm6si-mysql.services.clever-cloud.com:3306/belbr9kwb1stmqbvm6si?useSSL=false";
+    // Conexión a la BD
+    private static final String URL = "jdbc:mysql://belbr9kwb1stmqbvm6si-mysql.services.clever-cloud.com:3306/belbr9kwb1stmqbvm6si?zeroDateTimeBehavior=CONVERT_TO_NULL";
     private static final String USER = "uakgprfg2wghdbl8";
     private static final String PASSWORD = "GbNuYm3g8kkcG1jRi14n";
 
-
-
-    // Modelo para la tabla
+    // Modelo de tabla
     private static DefaultTableModel modeloTabla;
 
-    // Campos de entrada
-    private static JTextField nombreText, precioText, cantidadText, descripcionText, buscarText;
-    private static JComboBox<String> categoriaBox;
+    // Campos para entrada de datos
+    private static JTextField nombreText, precioCompraText, precioVentaText, stockText, stockMinimoText, idCategoriaText, idProveedorText, codigoBarrasText, fechaVencimientoText, buscarText;
     private static JTable tabla;
 
     public static void main(String[] args) {
         // Crear ventana
-        JFrame frame = new JFrame("Productos");
+        JFrame frame = new JFrame("Gestión de Productos");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(700, 500);
+        frame.setSize(800, 600);
         frame.setLocationRelativeTo(null);
 
         JPanel panel = new JPanel();
         panel.setLayout(null);
         frame.add(panel);
 
-        // Etiqueta de título
-        JLabel tituloLabel = new JLabel("VENTANA PRODUCTOS");
-        tituloLabel.setBounds(250, 10, 200, 25);
-        tituloLabel.setForeground(Color.BLUE);
-        tituloLabel.setFont(new Font("Arial", Font.BOLD, 18));
-        panel.add(tituloLabel);
-
         // Colocar componentes
         colocarComponentes(panel);
 
-        // Cargar datos desde la base de datos
+        // Cargar datos desde la BD
         cargarDatosDesdeBD();
 
         frame.setVisible(true);
     }
 
     private static void colocarComponentes(JPanel panel) {
+        JLabel tituloLabel = new JLabel("Gestión de Productos");
+        tituloLabel.setBounds(300, 10, 300, 25);
+        tituloLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        panel.add(tituloLabel);
+
         JLabel nombreLabel = new JLabel("Nombre:");
         nombreLabel.setBounds(20, 50, 100, 25);
         panel.add(nombreLabel);
@@ -78,52 +66,72 @@ public class GestionProductos {
         nombreText.setBounds(120, 50, 160, 25);
         panel.add(nombreText);
 
-        JLabel categoriaLabel = new JLabel("Categoría:");
-        categoriaLabel.setBounds(20, 90, 100, 25);
-        panel.add(categoriaLabel);
+        JLabel precioCompraLabel = new JLabel("Precio Compra:");
+        precioCompraLabel.setBounds(20, 90, 100, 25);
+        panel.add(precioCompraLabel);
 
-        String[] categorias = {"","bebidas", "frituras", "galletas", "Hogar", "Otros"};
-        categoriaBox = new JComboBox<>(categorias);
-        categoriaBox.setBounds(120, 90, 160, 25);
-        panel.add(categoriaBox);
+        precioCompraText = new JTextField(20);
+        precioCompraText.setBounds(120, 90, 160, 25);
+        panel.add(precioCompraText);
 
-        JLabel precioLabel = new JLabel("Precio:");
-        precioLabel.setBounds(20, 130, 100, 25);
-        panel.add(precioLabel);
+        JLabel precioVentaLabel = new JLabel("Precio Venta:");
+        precioVentaLabel.setBounds(20, 130, 100, 25);
+        panel.add(precioVentaLabel);
 
-        precioText = new JTextField(20);
-        precioText.setBounds(120, 130, 160, 25);
-        panel.add(precioText);
+        precioVentaText = new JTextField(20);
+        precioVentaText.setBounds(120, 130, 160, 25);
+        panel.add(precioVentaText);
 
-        JLabel cantidadLabel = new JLabel("Cantidad:");
-        cantidadLabel.setBounds(20, 170, 100, 25);
-        panel.add(cantidadLabel);
+        JLabel stockLabel = new JLabel("Stock:");
+        stockLabel.setBounds(20, 170, 100, 25);
+        panel.add(stockLabel);
 
-        cantidadText = new JTextField(20);
-        cantidadText.setBounds(120, 170, 160, 25);
-        panel.add(cantidadText);
+        stockText = new JTextField(20);
+        stockText.setBounds(120, 170, 160, 25);
+        panel.add(stockText);
 
-        JLabel descripcionLabel = new JLabel("Descripción:");
-        descripcionLabel.setBounds(20, 210, 100, 25);
-        panel.add(descripcionLabel);
+        JLabel stockMinimoLabel = new JLabel("Stock Mínimo:");
+        stockMinimoLabel.setBounds(20, 210, 100, 25);
+        panel.add(stockMinimoLabel);
 
-        descripcionText = new JTextField(50);
-        descripcionText.setBounds(120, 210, 160, 25);
-        panel.add(descripcionText);
+        stockMinimoText = new JTextField(20);
+        stockMinimoText.setBounds(120, 210, 160, 25);
+        panel.add(stockMinimoText);
 
-        JLabel buscarLabel = new JLabel("Buscar:");
-        buscarLabel.setBounds(320, 210, 100, 25);
-        panel.add(buscarLabel);
+        JLabel idCategoriaLabel = new JLabel("ID Categoría:");
+        idCategoriaLabel.setBounds(20, 250, 100, 25);
+        panel.add(idCategoriaLabel);
 
-        buscarText = new JTextField(20);
-        buscarText.setBounds(370, 210, 160, 25);
-        panel.add(buscarText);
+        idCategoriaText = new JTextField(20);
+        idCategoriaText.setBounds(120, 250, 160, 25);
+        panel.add(idCategoriaText);
 
-        JButton buscarButton = new JButton("Buscar");
-        buscarButton.setBounds(540, 210, 100, 25);
-        panel.add(buscarButton);
+        JLabel idProveedorLabel = new JLabel("ID Proveedor:");
+        idProveedorLabel.setBounds(20, 290, 100, 25);
+        panel.add(idProveedorLabel);
 
-        JButton agregarButton = new JButton("Registrar");
+        idProveedorText = new JTextField(20);
+        idProveedorText.setBounds(120, 290, 160, 25);
+        panel.add(idProveedorText);
+
+        JLabel codigoBarrasLabel = new JLabel("Código Barras:");
+        codigoBarrasLabel.setBounds(20, 330, 100, 25);
+        panel.add(codigoBarrasLabel);
+
+        codigoBarrasText = new JTextField(20);
+        codigoBarrasText.setBounds(120, 330, 160, 25);
+        panel.add(codigoBarrasText);
+
+        JLabel fechaVencimientoLabel = new JLabel("Fecha Vencimiento:");
+        fechaVencimientoLabel.setBounds(20, 370, 120, 25);
+        panel.add(fechaVencimientoLabel);
+
+        fechaVencimientoText = new JTextField(20);
+        fechaVencimientoText.setBounds(150, 370, 130, 25);
+        panel.add(fechaVencimientoText);
+
+        // Botones
+        JButton agregarButton = new JButton("Agregar");
         agregarButton.setBounds(320, 50, 120, 25);
         panel.add(agregarButton);
 
@@ -135,11 +143,24 @@ public class GestionProductos {
         eliminarButton.setBounds(320, 130, 120, 25);
         panel.add(eliminarButton);
 
-        String[] columnas = {"ID", "Nombre", "Categoría", "Precio", "Cantidad", "Código Barras", "Descripción"};
+        JButton buscarButton = new JButton("Buscar");
+        buscarButton.setBounds(320, 170, 120, 25);
+        panel.add(buscarButton);
+
+        JLabel buscarLabel = new JLabel("Buscar:");
+        buscarLabel.setBounds(320, 210, 60, 25);
+        panel.add(buscarLabel);
+
+        buscarText = new JTextField(20);
+        buscarText.setBounds(380, 210, 160, 25);
+        panel.add(buscarText);
+
+        // Tabla
+        String[] columnas = {"ID", "Nombre", "Precio Compra", "Precio Venta", "Stock", "Stock Minimo", "ID Categoria", "ID Proveedor", "Código Barras", "Fecha Vencimiento"};
         modeloTabla = new DefaultTableModel(columnas, 0);
         tabla = new JTable(modeloTabla);
         JScrollPane scrollPane = new JScrollPane(tabla);
-        scrollPane.setBounds(20, 260, 640, 180);
+        scrollPane.setBounds(20, 420, 740, 130);
         panel.add(scrollPane);
 
         // Acciones de los botones
@@ -149,10 +170,10 @@ public class GestionProductos {
         buscarButton.addActionListener(e -> buscarProducto());
     }
 
-    // Método para cargar datos desde la base de datos
+    // Cargar datos desde la BD
     private static void cargarDatosDesdeBD() {
         try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD)) {
-            String sql = "SELECT * FROM productos";
+            String sql = "SELECT * FROM Productos";
             Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
 
@@ -160,11 +181,14 @@ public class GestionProductos {
                 modeloTabla.addRow(new Object[]{
                         rs.getInt("idProducto"),
                         rs.getString("nombre"),
-                        rs.getString("categoria"),
-                        rs.getDouble("precio"),
-                        rs.getInt("cantidad"),
+                        rs.getDouble("precioCompra"),
+                        rs.getDouble("precioVenta"),
+                        rs.getInt("stock"),
+                        rs.getInt("stockMinimo"),
+                        rs.getInt("idCategoria"),
+                        rs.getInt("idProveedor"),
                         rs.getString("codigoBarras"),
-                        rs.getString("descripcion")
+                        rs.getDate("fechaVencimiento")
                 });
             }
         } catch (SQLException e) {
@@ -174,37 +198,23 @@ public class GestionProductos {
 
     // Método para agregar producto
     private static void agregarProducto() {
-        String nombre = nombreText.getText();
-        String categoria = (String) categoriaBox.getSelectedItem();
-        String precioStr = precioText.getText();
-        String cantidadStr = cantidadText.getText();
-        String descripcion = descripcionText.getText();
-        String codigoBarras = generarCodigoBarras();
-
-        if (nombre.isEmpty() || precioStr.isEmpty() || cantidadStr.isEmpty()) {
-            JOptionPane.showMessageDialog(null, "Por favor, completa todos los campos.");
-            return;
-        }
-
-        try {
-            double precio = Double.parseDouble(precioStr);
-            int cantidad = Integer.parseInt(cantidadStr);
-
-            Connection conn = DriverManager.getConnection(URL, USER, PASSWORD);
-            String sql = "INSERT INTO productos (nombre, categoria, precio, cantidad, codigoBarras, descripcion) VALUES (?, ?, ?, ?, ?, ?)";
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD)) {
+            String sql = "INSERT INTO Productos (nombre, precioCompra, precioVenta, stock, stockMinimo, idCategoria, idProveedor, codigoBarras, fechaVencimiento) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setString(1, nombre);
-            stmt.setString(2, categoria);
-            stmt.setDouble(3, precio);
-            stmt.setInt(4, cantidad);
-            stmt.setString(5, codigoBarras);
-            stmt.setString(6, descripcion);
+            stmt.setString(1, nombreText.getText());
+            stmt.setDouble(2, Double.parseDouble(precioCompraText.getText()));
+            stmt.setDouble(3, Double.parseDouble(precioVentaText.getText()));
+            stmt.setInt(4, Integer.parseInt(stockText.getText()));
+            stmt.setInt(5, Integer.parseInt(stockMinimoText.getText()));
+            stmt.setInt(6, Integer.parseInt(idCategoriaText.getText()));
+            stmt.setInt(7, Integer.parseInt(idProveedorText.getText()));
+            stmt.setString(8, codigoBarrasText.getText());
+            stmt.setString(9, fechaVencimientoText.getText());
             stmt.executeUpdate();
-
-            modeloTabla.addRow(new Object[]{nombre, categoria, precio, cantidad, codigoBarras, descripcion});
-            limpiarCampos();
-            JOptionPane.showMessageDialog(null, "Producto registrado con éxito.");
-        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Producto agregado correctamente.");
+            modeloTabla.setRowCount(0);
+            cargarDatosDesdeBD();
+        } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al agregar producto: " + e.getMessage());
         }
     }
@@ -214,30 +224,23 @@ public class GestionProductos {
         int filaSeleccionada = tabla.getSelectedRow();
         if (filaSeleccionada >= 0) {
             int idProducto = (int) modeloTabla.getValueAt(filaSeleccionada, 0);
-            String nombre = nombreText.getText();
-            String categoria = (String) categoriaBox.getSelectedItem();
-            double precio = Double.parseDouble(precioText.getText());
-            int cantidad = Integer.parseInt(cantidadText.getText());
-            String descripcion = descripcionText.getText();
-
             try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD)) {
-                String sql = "UPDATE productos SET nombre=?, categoria=?, precio=?, cantidad=?, descripcion=? WHERE idProducto=?";
+                String sql = "UPDATE Productos SET nombre=?, precioCompra=?, precioVenta=?, stock=?, stockMinimo=?, idCategoria=?, idProveedor=?, codigoBarras=?, fechaVencimiento=? WHERE idProducto=?";
                 PreparedStatement stmt = conn.prepareStatement(sql);
-                stmt.setString(1, nombre);
-                stmt.setString(2, categoria);
-                stmt.setDouble(3, precio);
-                stmt.setInt(4, cantidad);
-                stmt.setString(5, descripcion);
-                stmt.setInt(6, idProducto);
+                stmt.setString(1, nombreText.getText());
+                stmt.setDouble(2, Double.parseDouble(precioCompraText.getText()));
+                stmt.setDouble(3, Double.parseDouble(precioVentaText.getText()));
+                stmt.setInt(4, Integer.parseInt(stockText.getText()));
+                stmt.setInt(5, Integer.parseInt(stockMinimoText.getText()));
+                stmt.setInt(6, Integer.parseInt(idCategoriaText.getText()));
+                stmt.setInt(7, Integer.parseInt(idProveedorText.getText()));
+                stmt.setString(8, codigoBarrasText.getText());
+                stmt.setString(9, fechaVencimientoText.getText());
+                stmt.setInt(10, idProducto);
                 stmt.executeUpdate();
-
-                modeloTabla.setValueAt(nombre, filaSeleccionada, 1);
-                modeloTabla.setValueAt(categoria, filaSeleccionada, 2);
-                modeloTabla.setValueAt(precio, filaSeleccionada, 3);
-                modeloTabla.setValueAt(cantidad, filaSeleccionada, 4);
-                modeloTabla.setValueAt(descripcion, filaSeleccionada, 6);
-                limpiarCampos();
-                JOptionPane.showMessageDialog(null, "Producto actualizado con éxito.");
+                JOptionPane.showMessageDialog(null, "Producto actualizado correctamente.");
+                modeloTabla.setRowCount(0);
+                cargarDatosDesdeBD();
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(null, "Error al actualizar producto: " + e.getMessage());
             }
@@ -252,12 +255,13 @@ public class GestionProductos {
         if (filaSeleccionada >= 0) {
             int idProducto = (int) modeloTabla.getValueAt(filaSeleccionada, 0);
             try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD)) {
-                String sql = "DELETE FROM productos WHERE idProducto=?";
+                String sql = "DELETE FROM Productos WHERE idProducto=?";
                 PreparedStatement stmt = conn.prepareStatement(sql);
                 stmt.setInt(1, idProducto);
                 stmt.executeUpdate();
-                modeloTabla.removeRow(filaSeleccionada);
-                JOptionPane.showMessageDialog(null, "Producto eliminado con éxito.");
+                JOptionPane.showMessageDialog(null, "Producto eliminado correctamente.");
+                modeloTabla.setRowCount(0);
+                cargarDatosDesdeBD();
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(null, "Error al eliminar producto: " + e.getMessage());
             }
@@ -274,46 +278,28 @@ public class GestionProductos {
             return;
         }
         try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD)) {
-            String sql = "SELECT * FROM productos WHERE nombre LIKE ?";
+            String sql = "SELECT * FROM Productos WHERE nombre LIKE ?";
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setString(1, "%" + nombreBuscar + "%");
             ResultSet rs = stmt.executeQuery();
 
-            DefaultTableModel modeloFiltrado = new DefaultTableModel(new String[]{"ID", "Nombre", "Categoría", "Precio", "Cantidad", "Código Barras", "Descripción"}, 0);
+            modeloTabla.setRowCount(0);
             while (rs.next()) {
-                modeloFiltrado.addRow(new Object[]{
+                modeloTabla.addRow(new Object[]{
                         rs.getInt("idProducto"),
                         rs.getString("nombre"),
-                        rs.getString("categoria"),
-                        rs.getDouble("precio"),
-                        rs.getInt("cantidad"),
+                        rs.getDouble("precioCompra"),
+                        rs.getDouble("precioVenta"),
+                        rs.getInt("stock"),
+                        rs.getInt("stockMinimo"),
+                        rs.getInt("idCategoria"),
+                        rs.getInt("idProveedor"),
                         rs.getString("codigoBarras"),
-                        rs.getString("descripcion")
+                        rs.getDate("fechaVencimiento")
                 });
             }
-            tabla.setModel(modeloFiltrado);
         } catch (SQLException e) {
             JOptionPane.showMessageDialog(null, "Error al buscar producto: " + e.getMessage());
         }
-    }
-
-    // Generar código de barras aleatorio
-    private static String generarCodigoBarras() {
-        Random rand = new Random();
-        StringBuilder codigo = new StringBuilder();
-        for (int i = 0; i < 12; i++) {
-            codigo.append(rand.nextInt(10));
-        }
-        return codigo.toString();
-    }
-
-    // Limpiar campos después de las operaciones
-    private static void limpiarCampos() {
-        nombreText.setText("");
-        precioText.setText("");
-        cantidadText.setText("");
-        descripcionText.setText("");
-        buscarText.setText("");
-        categoriaBox.setSelectedIndex(0);
     }
 }
